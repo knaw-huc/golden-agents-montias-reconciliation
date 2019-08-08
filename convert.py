@@ -1,5 +1,49 @@
 """
 Convert the Getty's Dutch Archival Descriptions and Contents to a basic RDF format.
+
+Example TriG:
+    <http://goldenagents.org/uva/SAA/Inventory/N-100> a saa:Inventory ;
+        saa:archive _:GemeentearchiefAmsterdamNederland ;
+        saa:archiveDocumentReference "NAA 2413 (film 2552)" ;
+        saa:beginDate "1684-10-04"^^xsd:date ;
+        saa:city <http://vocab.getty.edu/tgn/7006952> ;
+        saa:content <http://goldenagents.org/uva/SAA/Inventory/Item/N-100_0001>,
+            <http://goldenagents.org/uva/SAA/Inventory/Item/N-100_0002>,
+            <http://goldenagents.org/uva/SAA/Inventory/Item/N-100_0003>,
+            <http://goldenagents.org/uva/SAA/Inventory/Item/N-100_0004>,
+            <http://goldenagents.org/uva/SAA/Inventory/Item/N-100_0005>,
+            <http://goldenagents.org/uva/SAA/Inventory/Item/N-100_0006>,
+            <http://goldenagents.org/uva/SAA/Inventory/Item/N-100_0007>,
+            <http://goldenagents.org/uva/SAA/Inventory/Item/N-100_0008>,
+            <http://goldenagents.org/uva/SAA/Inventory/Item/N-100_0009> ;
+        saa:country <http://vocab.getty.edu/tgn/7016845> ;
+        saa:documentType "Inventory"@en-US ;
+        saa:documentedIn _:saaInventory2413 ;
+        saa:identifier "N-100" ;
+        saa:owners <http://goldenagents.org/uva/SAA/Person/N-100owner01> ;
+        saa:registrationDate "1684-10-04"^^xsd:date ;
+        rdfs:comment "Specificatie van de ongedeclareerde schilderijen etc. van 
+            wijlen Louis Trip, in sijn leven out burgemeester en raedt der stadt 
+            Amsterdam, gevonden in zijn sterfhuis op de Kloveniersburgwal."@nl .
+
+    <http://goldenagents.org/uva/SAA/Inventory/Item/N-100_0001> a saa:Item ;
+        rdfs:label "Een boere geselschap"@nl ;
+        saa:identifier "DUTCHINV-12704" ;
+        saa:index "1" ;
+        saa:isInRecord <http://goldenagents.org/uva/SAA/Inventory/N-100> ;
+        saa:room "Opte eedt zael"@nl ;
+        saa:transcription "een schilderij voor de schoorsteen aende muur
+            vast gemaeckt, sijnd een boere geselschap met een groene 
+            vergulde lijst, [etc.]"@nl .
+
+    <http://goldenagents.org/uva/SAA/Person/N-100owner01> a saa:Person ;
+        rdfs:label "Trip, Louis" ;
+        saa:isInRecord <http://goldenagents.org/uva/SAA/Inventory/N-100> .
+
+    _:GemeentearchiefAmsterdamNederland a saa:Archive ;
+        rdfs:label "Gemeentearchief" ;
+        saa:location "Amsterdam, Nederland" .
+
 """
 
 import os
@@ -50,6 +94,15 @@ CITIES = {
 
 
 def main(dataset):
+    """Process the Getty Archival Descriptions and the Archival Contents. 
+    
+    Args:
+        dataset (rdflib.Dataset): Dataset container to store named graphs
+    
+    Returns:
+        rdflib.Dataset: A dataset (similar to rdflib.ConjunctiveGraph) with the
+            converted Getty Dutch Archival Inventories data.
+    """
 
     g = dataset.graph(identifier=ga.term('Dutch_Archival_Inventories'))
 
@@ -83,6 +136,7 @@ def description2rdf(record, g):
         rdflib.Graph: named graph
     """
 
+    # Add inventory as resource
     inventory = saaInventory.term(record['pi_record_no'])
 
     g.add((inventory, RDF.type, saa.Inventory))
@@ -103,21 +157,26 @@ def description2rdf(record, g):
     g.add((inventory, saa.documentType,
            Literal(record['document_type'], lang='en-US')))
 
+    # Add owners
     owners, g = getOwners(record, g=g, inventory=inventory)
 
     for owner in owners:
         g.add((inventory, saa.owners, owner))
 
+    # Add beneficiaries
     beneficiaries, g = getBeneficiaries(record, g=g, inventory=inventory)
 
     for beneficiary in beneficiaries:
         g.add((inventory, saa.beneficiaries, beneficiary))
 
+    # Add appraisers
     appraisers, g = getAppraisers(record, g=g, inventory=inventory)
 
     for beneficiary in appraisers:
         g.add((inventory, saa.appraisers, beneficiary))
 
+    # Dates
+    # Try parsing the dates automatically using python's datetime library
     try:
         beginDate = datetime(int(record['begin_date_year']),
                              int(record['begin_date_month']),
@@ -150,6 +209,7 @@ def description2rdf(record, g):
         g.add((inventory, saa.registrationDate,
                Literal(date.strftime('%Y-%m-%d'), datatype=XSD.date)))
 
+    # Add holding archive
     archive, g = getArchive(record, g)
     if archive is not None:
         g.add((inventory, saa.archive, archive))
@@ -176,6 +236,16 @@ def description2rdf(record, g):
 
 
 def getOwners(record, g, inventory):
+    """Parse inventory owners and add to graph.
+    
+    Args:
+        record (dict): Inventory information as dictionary (row from csv)
+        g (rdflib.Graph): named graph
+        inventory (rdflib.URIRef): URI for the inventory (for back reference)
+    
+    Returns:
+        tuple: Tuple of list of owners (list) and the graph (rdflib.Graph)
+    """
 
     owners = []
 
@@ -210,6 +280,16 @@ def getOwners(record, g, inventory):
 
 
 def getBeneficiaries(record, g, inventory):
+    """Parse inventory beneficiaries and add to graph.
+    
+    Args:
+        record (dict): Inventory information as dictionary (row from csv)
+        g (rdflib.Graph): named graph
+        inventory (rdflib.URIRef): URI for the inventory (for back reference)
+    
+    Returns:
+        tuple: Tuple of list of beneficiaries (list) and the graph (rdflib.Graph)
+    """
 
     beneficiaries = []
 
@@ -234,6 +314,16 @@ def getBeneficiaries(record, g, inventory):
 
 
 def getAppraisers(record, g, inventory):
+    """Parse inventory appraisers and add to graph.
+    
+    Args:
+        record (dict): Inventory information as dictionary (row from csv)
+        g (rdflib.Graph): named graph
+        inventory (rdflib.URIRef): URI for the inventory (for back reference)
+    
+    Returns:
+        tuple: Tuple of list of appraisers (list) and the graph (rdflib.Graph)
+    """
 
     appraisers = []
 
@@ -258,8 +348,14 @@ def getAppraisers(record, g, inventory):
 
 
 def getArchive(record, g):
-    """
-    archive_name	archive_loc	    archive_doc_no   
+    """Parse inventory holding archive and add to graph.
+    
+    Args:
+        record (dict): Inventory information as dictionary (row from csv)
+        g (rdflib.Graph): named graph
+    
+    Returns:
+        tuple: Tuple of the archive (rdflib.URIRef) and the graph (rdflib.Graph).
     """
 
     if record['archive_name'] != "":

@@ -400,7 +400,9 @@ def items2rdf(record, g):
         g.add((item, saa.identifier, Literal(record['persistent_uid'])))
 
     g.add((item, RDFS.label, Literal(record['title'], lang='nl')))
+    g.add((item, saa.artist, Literal(record['artist_name_1'])))
     g.add((item, saa.transcription, Literal(record['entry'], lang='nl')))
+    g.add((item, saa.workType, Literal(record['object_type_1'], lang='nl')))
 
     if record['room'] != "":
         g.add((item, saa.room, Literal(record['room'], lang='nl')))

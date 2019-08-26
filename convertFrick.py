@@ -76,10 +76,10 @@ def main(dataset):
             g = description2rdf(r, g=g)
 
     # # Add items
-    # with open(ARCHIVE_ITEMS, encoding='utf-8') as csvfile:
-    #     reader = csv.DictReader(csvfile)
-    #     for r in reader:
-    #         g = items2rdf(r, g=g)
+    with open(ARCHIVE_ITEMS, encoding='utf-8') as csvfile:
+        reader = csv.DictReader(csvfile)
+        for r in reader:
+            g = items2rdf(r, g=g)
 
     return dataset
 
@@ -214,9 +214,9 @@ def items2rdf(record, g):
     Returns:
         rdflib.Graph: named graph
     """
-    inventory = saaInventory.term(record['pi_inventory_no'])
-    item = saaItem.term(
-        f"{record['pi_inventory_no']}_{record['assigned_item_no'].zfill(4)}")
+    inventory = saaInventory.term(record['inventory_number'])
+    inventoryLot = re.sub(r'[\[\]`]', '', record['inventory_lot'])
+    item = saaItem.term(inventoryLot)
 
     g.add((inventory, saa.content, item))
     g.add((item, saa.isInRecord, inventory))
@@ -224,18 +224,20 @@ def items2rdf(record, g):
     # Info on the item
     g.add((item, RDF.type, saa.Item))
     g.add((item, saa.term('index'), Literal(record['assigned_item_no'])))
+    g.add((item, saa.workType, Literal(record['type'], lang='en')))
 
-    if record['persistent_uid'] != "":
-        g.add((item, saa.identifier, Literal(record['persistent_uid'])))
+    # if record['persistent_uid'] != "":
+    #     g.add((item, saa.identifier, Literal(record['persistent_uid'])))
 
     g.add((item, RDFS.label, Literal(record['title'], lang='nl')))
+    g.add((item, saa.artist, Literal(record['artist_name'])))
     g.add((item, saa.transcription, Literal(record['entry'], lang='nl')))
 
     if record['room'] != "":
         g.add((item, saa.room, Literal(record['room'], lang='nl')))
 
-    if record['valuation_amount'] != "":
-        g.add((item, saa.valuation, Literal(record['valuation_amount'])))
+    if record['value'] != "":
+        g.add((item, saa.valuation, Literal(record['value'])))
 
     return g
 

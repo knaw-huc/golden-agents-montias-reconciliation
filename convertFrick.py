@@ -164,11 +164,11 @@ def description2rdf(record, g):
         elif 'boedel' in archiveReference:
             inventoryNumber = []
         else:
-            inventoryNumber = re.findall(r"(?:NA)?[ ]?(\d{2,5}\w?)",
+            inventoryNumber = re.findall(r"(?:NA)?[ ]?(\d{2,5}[ ]?[A-B]?)",
                                          archiveReference)
 
         if inventoryNumber != []:
-            inventoryNumber = inventoryNumber[0].upper()
+            inventoryNumber = inventoryNumber[0].upper().replace(' ', '')
 
             book = BNode(f"saaInventory{inventoryNumber}")
             g.add((book, saa.inventoryNumber, Literal(inventoryNumber)))

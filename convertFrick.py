@@ -175,6 +175,7 @@ def description2rdf(record, g):
             if archive is not None:
                 g.add((book, saa.heldBy, archive))
 
+            g.add((book, RDF.type, saa.InventoryBook))
             g.add((inventory, saa.documentedIn, book))
 
     return g

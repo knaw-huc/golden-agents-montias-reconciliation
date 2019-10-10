@@ -149,6 +149,10 @@ def description2rdf(record, g):
     if comment != "":
         g.add((inventory, RDFS.comment, Literal(comment, lang='nl')))
 
+    notes = record['notes']
+    if notes != "":
+        g.add((inventory, RDFS.comment, Literal(notes)))
+
     if country is not None:
         g.add((inventory, saa.country, country))
     if city is not None:
@@ -230,6 +234,7 @@ def description2rdf(record, g):
                 if archive is not None:
                     g.add((book, saa.heldBy, archive))
 
+                g.add((book, RDF.type, saa.InventoryBook))
                 g.add((inventory, saa.documentedIn, book))
 
     return g
@@ -386,8 +391,9 @@ def items2rdf(record, g):
         rdflib.Graph: named graph
     """
     inventory = saaInventory.term(record['pi_inventory_no'])
-    item = saaItem.term(
-        f"{record['pi_inventory_no']}_{record['assigned_item_no'].zfill(4)}")
+    inventoryLot = f"{record['pi_inventory_no']}_{record['assigned_item_no'].zfill(4)}"
+    inventoryLot = re.sub(r'[\[\]`]', '', inventoryLot)
+    item = saaItem.term(inventoryLot)
 
     g.add((inventory, saa.content, item))
     g.add((item, saa.isInRecord, inventory))

@@ -15,17 +15,20 @@ from datetime import datetime
 from rdflib import Dataset, Graph, Namespace, URIRef, Literal, BNode
 from rdflib import RDF, RDFS, XSD
 
-ga = Namespace("http://goldenagents.org/uva/SAA/datasets/")
-saa = Namespace("http://goldenagents.org/uva/SAA/ontology/")
+ga = Namespace("https://data.goldenagents.org/datasets/montiasfrick/")
+saa = Namespace("https://data.goldenagents.org/datasets/SAA/ontology/")
 
-saaPerson = Namespace("http://goldenagents.org/uva/SAA/Person/")
-saaInventory = Namespace("http://goldenagents.org/uva/SAA/Inventory/")
-saaItem = Namespace("http://goldenagents.org/uva/SAA/Inventory/Item/")
+saaPerson = Namespace(
+    "https://data.goldenagents.org/datasets/montiasfrick/Person/")
+saaInventory = Namespace(
+    "https://data.goldenagents.org/datasets/montiasfrick/Inventory/")
+saaItem = Namespace(
+    "https://data.goldenagents.org/datasets/montiasfrick/Inventory/Item/")
 
 tgn = Namespace("http://vocab.getty.edu/tgn/")
 
-ARCHIVE_DESCRIPTIONS = 'data/MontiasSets/InventoryExport.csv'
-ARCHIVE_ITEMS = 'data/MontiasSets/Montias2ArtExport.csv'
+ARCHIVE_DESCRIPTIONS = 'data/MontiasSets/frick_InventoryExport.csv'
+ARCHIVE_ITEMS = 'data/MontiasSets/frick_Montias2ArtExport.csv'
 
 ############################################################
 # Mapping to the Getty Thesaurus of Geographic Names (TGN) #
@@ -53,11 +56,11 @@ CITIES = {
 
 
 def main(dataset):
-    """Process the Frick/Montias Archival Descriptions and the Archival Contents. 
-    
+    """Process the Frick/Montias Archival Descriptions and the Archival Contents.
+
     Args:
         dataset (rdflib.Dataset): Dataset container to store named graphs
-    
+
     Returns:
         rdflib.Dataset: A dataset (similar to rdflib.ConjunctiveGraph) with the
             converted Getty Dutch Archival Inventories data.
@@ -86,11 +89,11 @@ def main(dataset):
 
 def description2rdf(record, g):
     """Convert the list of Archival Descriptions to RDF.
-    
+
     Args:
         record (dict): row in the descriptions csv
         g (rdflib.Graph): named graph
-    
+
     Returns:
         rdflib.Graph: named graph
     """
@@ -183,11 +186,11 @@ def description2rdf(record, g):
 
 def getArchive(record, g):
     """Parse inventory holding archive and add to graph.
-    
+
     Args:
         record (dict): Inventory information as dictionary (row from csv)
         g (rdflib.Graph): named graph
-    
+
     Returns:
         tuple: Tuple of the archive (rdflib.URIRef) and the graph (rdflib.Graph).
     """
@@ -207,11 +210,11 @@ def getArchive(record, g):
 
 def items2rdf(record, g):
     """Convert the list of Archival Items to RDF
-    
+
     Args:
         record (dict): row in the items csv
         g (rdflib.Graph): named graph
-    
+
     Returns:
         rdflib.Graph: named graph
     """

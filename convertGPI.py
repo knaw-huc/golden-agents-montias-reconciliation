@@ -22,8 +22,8 @@ Example TriG:
         saa:identifier "N-100" ;
         saa:owners <http://goldenagents.org/uva/SAA/Person/N-100owner01> ;
         saa:registrationDate "1684-10-04"^^xsd:date ;
-        rdfs:comment "Specificatie van de ongedeclareerde schilderijen etc. van 
-            wijlen Louis Trip, in sijn leven out burgemeester en raedt der stadt 
+        rdfs:comment "Specificatie van de ongedeclareerde schilderijen etc. van
+            wijlen Louis Trip, in sijn leven out burgemeester en raedt der stadt
             Amsterdam, gevonden in zijn sterfhuis op de Kloveniersburgwal."@nl .
 
     <http://goldenagents.org/uva/SAA/Inventory/Item/N-100_0001> a saa:Item ;
@@ -33,7 +33,7 @@ Example TriG:
         saa:isInRecord <http://goldenagents.org/uva/SAA/Inventory/N-100> ;
         saa:room "Opte eedt zael"@nl ;
         saa:transcription "een schilderij voor de schoorsteen aende muur
-            vast gemaeckt, sijnd een boere geselschap met een groene 
+            vast gemaeckt, sijnd een boere geselschap met een groene
             vergulde lijst, [etc.]"@nl .
 
     <http://goldenagents.org/uva/SAA/Person/N-100owner01> a saa:Person ;
@@ -56,17 +56,20 @@ from datetime import datetime
 from rdflib import Dataset, Graph, Namespace, URIRef, Literal, BNode
 from rdflib import RDF, RDFS, XSD
 
-ga = Namespace("http://goldenagents.org/uva/SAA/datasets/")
-saa = Namespace("http://goldenagents.org/uva/SAA/ontology/")
+ga = Namespace("https://data.goldenagents.org/datasets/montiasgpi/")
+saa = Namespace("https://data.goldenagents.org/datasets/SAA/ontology/")
 
-saaPerson = Namespace("http://goldenagents.org/uva/SAA/Person/")
-saaInventory = Namespace("http://goldenagents.org/uva/SAA/Inventory/")
-saaItem = Namespace("http://goldenagents.org/uva/SAA/Inventory/Item/")
+saaPerson = Namespace(
+    "https://data.goldenagents.org/datasets/montiasgpi/Person/")
+saaInventory = Namespace(
+    "https://data.goldenagents.org/datasets/montiasgpi/Inventory/")
+saaItem = Namespace(
+    "https://data.goldenagents.org/datasets/montiasgpi/Inventory/Item/")
 
 tgn = Namespace("http://vocab.getty.edu/tgn/")
 
-ARCHIVE_DESCRIPTIONS = 'data/GPI/dutch_archival_descriptions_utf8.csv'
-ARCHIVE_ITEMS = 'data/GPI/dutch_archival_contents_utf8.csv'
+ARCHIVE_DESCRIPTIONS = 'data/GPI/getty_dutch_archival_descriptions_utf8.csv'
+ARCHIVE_ITEMS = 'data/GPI/getty_dutch_archival_contents_utf8.csv'
 
 ############################################################
 # Mapping to the Getty Thesaurus of Geographic Names (TGN) #
@@ -94,11 +97,11 @@ CITIES = {
 
 
 def main(dataset):
-    """Process the Getty Archival Descriptions and the Archival Contents. 
-    
+    """Process the Getty Archival Descriptions and the Archival Contents.
+
     Args:
         dataset (rdflib.Dataset): Dataset container to store named graphs
-    
+
     Returns:
         rdflib.Dataset: A dataset (similar to rdflib.ConjunctiveGraph) with the
             converted Getty Dutch Archival Inventories data.
@@ -127,11 +130,11 @@ def main(dataset):
 
 def description2rdf(record, g):
     """Convert the list of Archival Descriptions to RDF.
-    
+
     Args:
         record (dict): row in the descriptions csv
         g (rdflib.Graph): named graph
-    
+
     Returns:
         rdflib.Graph: named graph
     """
@@ -242,12 +245,12 @@ def description2rdf(record, g):
 
 def getOwners(record, g, inventory):
     """Parse inventory owners and add to graph.
-    
+
     Args:
         record (dict): Inventory information as dictionary (row from csv)
         g (rdflib.Graph): named graph
         inventory (rdflib.URIRef): URI for the inventory (for back reference)
-    
+
     Returns:
         tuple: Tuple of list of owners (list) and the graph (rdflib.Graph)
     """
@@ -286,12 +289,12 @@ def getOwners(record, g, inventory):
 
 def getBeneficiaries(record, g, inventory):
     """Parse inventory beneficiaries and add to graph.
-    
+
     Args:
         record (dict): Inventory information as dictionary (row from csv)
         g (rdflib.Graph): named graph
         inventory (rdflib.URIRef): URI for the inventory (for back reference)
-    
+
     Returns:
         tuple: Tuple of list of beneficiaries (list) and the graph (rdflib.Graph)
     """
@@ -320,12 +323,12 @@ def getBeneficiaries(record, g, inventory):
 
 def getAppraisers(record, g, inventory):
     """Parse inventory appraisers and add to graph.
-    
+
     Args:
         record (dict): Inventory information as dictionary (row from csv)
         g (rdflib.Graph): named graph
         inventory (rdflib.URIRef): URI for the inventory (for back reference)
-    
+
     Returns:
         tuple: Tuple of list of appraisers (list) and the graph (rdflib.Graph)
     """
@@ -354,11 +357,11 @@ def getAppraisers(record, g, inventory):
 
 def getArchive(record, g):
     """Parse inventory holding archive and add to graph.
-    
+
     Args:
         record (dict): Inventory information as dictionary (row from csv)
         g (rdflib.Graph): named graph
-    
+
     Returns:
         tuple: Tuple of the archive (rdflib.URIRef) and the graph (rdflib.Graph).
     """
@@ -382,11 +385,11 @@ def getArchive(record, g):
 
 def items2rdf(record, g):
     """Convert the list of Archival Items to RDF
-    
+
     Args:
         record (dict): row in the items csv
         g (rdflib.Graph): named graph
-    
+
     Returns:
         rdflib.Graph: named graph
     """
